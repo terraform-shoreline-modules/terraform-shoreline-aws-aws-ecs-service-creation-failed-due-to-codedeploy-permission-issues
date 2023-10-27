@@ -1,0 +1,94 @@
+{
+  "name": "aws_codedeploy_iam_role_permission_issue_for_ecs_service_creation",
+  "description": "This incident type refers to the issue faced while creating an Amazon ECS Service due to the error message \"Please create your Service role for CodeDeploy\". This error occurs because AWS CodeDeploy does not have the required IAM permissions to perform the blue/green deployment strategy. To resolve this, the CodeDeploy service needs to be granted the necessary permissions to update the Amazon ECS service. The incident typically requires troubleshooting by verifying the CodeDeploy IAM role and ensuring it has the required permissions.",
+  "params": [
+    {
+      "name": "APPLICATION_NAME",
+      "value": ""
+    },
+    {
+      "name": "CODEDEPLOY_IAM_ROLE_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## AWS CodeDeploy IAM role permission issue for ECS Service creation.\nThis incident type refers to the issue faced while creating an Amazon ECS Service due to the error message \"Please create your Service role for CodeDeploy\". This error occurs because AWS CodeDeploy does not have the required IAM permissions to perform the blue/green deployment strategy. To resolve this, the CodeDeploy service needs to be granted the necessary permissions to update the Amazon ECS service. The incident typically requires troubleshooting by verifying the CodeDeploy IAM role and ensuring it has the required permissions."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## List CodeDeploy applications"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `aws deploy list-applications`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Describe an IAM role"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `aws iam get-role --role-name ${CODEDEPLOY_IAM_ROLE_NAME}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Get the details of the CodeDeploy deployment"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_list_dep_groups_last_dep_details($APPLICATION_NAME)"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify that the CodeDeploy IAM role is created correctly and has the required permissions to update the Amazon ECS service."
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_policies_script($CODEDEPLOY_IAM_ROLE_NAME)"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Attach the necessary IAM permissions to perform the blue/green deployment strategy to the CodeDeploy service."
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_create_iam_policy($CODEDEPLOY_IAM_ROLE_NAME)"
+    }
+  ]
+}
